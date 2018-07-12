@@ -4,7 +4,6 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "26.0.0"
     defaultConfig {
         applicationId "com.q42.milightremotecontrol"
         minSdkVersion 25

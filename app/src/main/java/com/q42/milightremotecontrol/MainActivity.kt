@@ -14,14 +14,11 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.logging.Logger
 
+const val TAG = "MainActivity"
+const val MILIGHT_PORT = 5987
+const val bridge = "hf-lpb100"
+
 class MainActivity : AppCompatActivity() {
-
-    companion object {
-        val TAG = "MainActivity"
-    }
-
-    val MILIGHT_PORT = 5987
-    val bridge = "hf-lpb100"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

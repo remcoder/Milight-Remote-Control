@@ -1,6 +1,5 @@
 package de.eon.futurelab.utils
 
-import android.util.Log
 import java.lang.IllegalArgumentException
 
 class UByte(private val internal: Int) {
