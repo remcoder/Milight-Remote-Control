@@ -3,7 +3,8 @@ package com.q42.milightremotecontrol
 import android.util.Log
 import de.eon.futurelab.utils.UByte
 import de.eon.futurelab.utils.unsignedByteArrayOf
-import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.delay
+
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
