@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.toast
 import java.net.InetAddress
 import java.net.UnknownHostException
@@ -30,21 +29,25 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         setContentView(R.layout.activity_main)
 
         launch(Dispatchers.IO) {
-            try {
-                controller = MiLightController(InetAddress.getByName(bridge))
+            val ip = try {
+                InetAddress.getByName(bridge)
             } catch (ex: UnknownHostException) {
                 withContext(Dispatchers.Main) {
                     toast("Error while looking for bridge:\n${ex.message}")
                 }
+                null
+            }
+            ip?.let {
+                controller = MiLightController(ip)
             }
         }
 
-        on_button.onClick {
+        on_button.setOnClickListener {
             Log.i(TAG, "Turning lights on")
             launch(Dispatchers.IO) {
                 try {
                     controller.turnOn()
-                } catch(ex: Exception)  {
+                } catch (ex: Exception) {
                     withContext(Dispatchers.Main) {
                         toast("Error turning on lights:\n${ex.message}")
                     }
@@ -52,12 +55,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         }
 
-        off_button.onClick {
+        off_button.setOnClickListener {
             Log.i(TAG, "Turning lights off")
             launch(Dispatchers.IO) {
                 try {
                     controller.turnOff()
-                } catch(ex: Exception)  {
+                } catch (ex: Exception) {
                     withContext(Dispatchers.Main) {
                         toast("Error turning off lights:\n${ex.message}")
                     }
@@ -65,6 +68,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
