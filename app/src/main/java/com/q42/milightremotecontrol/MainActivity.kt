@@ -38,40 +38,61 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 null
             }
             ip?.let {
-                controller = MiLightController(ip)
+                Log.i(TAG, "$ip")
+                controller = MiLightController(this@MainActivity, ip)
             }
         }
 
         on_button.setOnClickListener {
             Log.i(TAG, "Turning lights on")
-            launch(Dispatchers.IO) {
-                try {
-                    controller.turnOn()
-                } catch (ex: Exception) {
-                    withContext(Dispatchers.Main) {
-                        toast("Error turning on lights:\n${ex.message}")
-                    }
-                }
-            }
+            controller.turnOn()
         }
 
         off_button.setOnClickListener {
             Log.i(TAG, "Turning lights off")
-            launch(Dispatchers.IO) {
-                try {
-                    controller.turnOff()
-                } catch (ex: Exception) {
-                    withContext(Dispatchers.Main) {
-                        toast("Error turning off lights:\n${ex.message}")
-                    }
-                }
-            }
+            controller.turnOff()
+        }
+
+        brighter.setOnClickListener {
+            Log.i(TAG, "Turning lights up a bit")
+            controller.brighter()
+        }
+
+        dimmer.setOnClickListener {
+            Log.i(TAG, "Turning lights down a bit")
+            controller.dimmer()
+        }
+
+        max_brightness.setOnClickListener {
+            Log.i(TAG, "Setting to max brightness")
+            controller.maxBrightness()
+        }
+
+        night_mode.setOnClickListener {
+            controller.nightMode()
+        }
+
+        warmer.setOnClickListener {
+            controller.warmer()
+        }
+
+        cooler.setOnClickListener {
+            controller.cooler()
+        }
+
+        link.setOnClickListener {
+            controller.link()
+        }
+
+        unlink.setOnClickListener {
+            controller.unlink()
         }
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
-        job.cancel() // Cancel job on activity destroy. After destroy all children jobs will be cancelled automatically
+        job.cancel()
+        controller.cancelJobs() // Cancel job on activity destroy. After destroy all children jobs will be cancelled automatically
     }
 }

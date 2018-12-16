@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.q42.milightremotecontrol.MainActivity">
+    tools:context="com.q42.milightremotecontrol.MainActivity"
+    android:gravity="center_horizontal">
 
     <Button
         android:id="@+id/on_button"
@@ -17,5 +18,53 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="off"/>
+
+    <Button
+        android:id="@+id/brighter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="brighter"/>
+
+    <Button
+        android:id="@+id/dimmer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="dimmer"/>
+
+    <Button
+        android:id="@+id/max_brightness"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="max"/>
+
+    <Button
+        android:id="@+id/night_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="night mode"/>
+
+    <Button
+        android:id="@+id/warmer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="warmer"/>
+
+    <Button
+        android:id="@+id/cooler"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="cooler"/>
+
+    <Button
+        android:id="@+id/link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="link"/>
+
+    <Button
+        android:id="@+id/unlink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="unlink"/>
 
 </LinearLayout>
