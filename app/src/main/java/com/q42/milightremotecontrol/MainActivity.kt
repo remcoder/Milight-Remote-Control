@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import org.jetbrains.anko.toast
 import java.net.InetAddress
 import java.net.UnknownHostException
 import kotlin.coroutines.CoroutineContext

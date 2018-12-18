@@ -5,7 +5,6 @@ import android.util.Log
 import de.eon.futurelab.utils.UByte
 import de.eon.futurelab.utils.unsignedByteArrayOf
 import kotlinx.coroutines.*
-import org.jetbrains.anko.toast
 
 import java.net.DatagramPacket
 import java.net.DatagramSocket
