@@ -10,6 +10,9 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import kotlin.coroutines.CoroutineContext
+import android.system.Os.socket
+
+
 
 const val DEFAULT_MILIGHT_PORT = 5987
 
@@ -18,11 +21,13 @@ const val zone = 1
 
 class MiLightController(
         private val context: Context,
-        private val address: InetAddress,
         private val port: Int = DEFAULT_MILIGHT_PORT
 ): CoroutineScope {
 
     private val job = Job()
+    private var isListening = false
+    private var isDiscovered = false
+    private var bridgeAddress : InetAddress? = null
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -37,7 +42,7 @@ class MiLightController(
                 0x61, 0x41, 0xA7, 0xF6, 0xDC, 0xAF, 0xD3, 0xE6,
                 0x00, 0x00, 0x1E) // (use checksum instead?)
 
-        val packet = DatagramPacket(requestSessionCmd, requestSessionCmd.count(), address, port)
+        val packet = DatagramPacket(requestSessionCmd, requestSessionCmd.count(), bridgeAddress, port)
         // send UDP packet
         socket.send(packet)
 
@@ -52,6 +57,8 @@ class MiLightController(
     }
 
     private fun sendCommand(cmd: ByteArray) {
+        if (!isDiscovered) return
+
         launch(Dispatchers.IO) {
             try {
                 // request session
@@ -65,7 +72,7 @@ class MiLightController(
                 val checksum = unsignedByteArrayOf(_cmd.sum() and 0xff)
                 val buffer = prefix + _cmd + checksum
                 // send command using session id
-                val packet2 = DatagramPacket(buffer, buffer.count(), address, port)
+                val packet2 = DatagramPacket(buffer, buffer.count(), bridgeAddress, port)
                 session.socket.send(packet2)
 
                 // Close socket
@@ -75,6 +82,86 @@ class MiLightController(
                     context.toast("Error turning on lights:\n${ex.message}")
                 }
             }
+        }
+    }
+
+    val discoveryMessageV6 = unsignedByteArrayOf(
+        0x48, 0x46, 0x2D, 0x41,
+        0x31, 0x31, 0x41, 0x53,
+        0x53, 0x49, 0x53, 0x54,
+        0x48, 0x52, 0x45, 0x41,
+        0x44)
+
+    fun discover() {
+        Log.i(TAG, "Discovering")
+
+        if (!isListening) {
+            listen()
+            isListening = true
+        }
+
+        sendDicoveryPacket()
+    }
+
+    fun sendDicoveryPacket() {
+
+        Log.i(TAG, "send packet")
+
+        launch(Dispatchers.IO) {
+            DatagramSocket().use { socket ->
+                socket.broadcast = true
+
+                val address = InetAddress.getByAddress(byteArrayOfInts(255, 255, 255, 255))
+                val broadcastPacket = DatagramPacket(
+                    discoveryMessageV6,
+                    discoveryMessageV6.size,
+                    address,
+                    DEFAULT_MILIGHT_PORT
+                )
+
+                try {
+                    socket.send(broadcastPacket)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+
+    fun listen()  {
+        Log.i(TAG, "listening")
+
+        launch(Dispatchers.IO) {
+            val address = InetAddress.getByAddress(byteArrayOfInts(0, 0, 0, 0))
+            DatagramSocket(DEFAULT_MILIGHT_PORT, address).use { socket ->
+                socket.broadcast = true
+
+                while (true) {
+
+                    val recvBuf = ByteArray(64)
+                    val packet = DatagramPacket(recvBuf, recvBuf.size)
+
+                    try {
+                        socket.receive(packet)
+                        if (packet.data.size >= 2) {
+                            val data = String(packet.data)
+//                            if (packet.address == InetAddress.getByName("192.168.178.29"))
+//                                continue
+
+                            withContext(Dispatchers.Main) {
+                                context.toast("$data ${packet.address}")
+                                bridgeAddress = packet.address
+//                                isDiscovered = true
+                            }
+//                            break
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            } // socket closed
+            isListening = false
         }
     }
 
@@ -138,4 +225,6 @@ class MiLightController(
     fun cancelJobs() {
         job.cancel()
     }
+
+    fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
 }

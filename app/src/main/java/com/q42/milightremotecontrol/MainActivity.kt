@@ -27,19 +27,24 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         setContentView(R.layout.activity_main)
 
-        launch(Dispatchers.IO) {
-            val ip = try {
-                InetAddress.getByName(bridge)
-            } catch (ex: UnknownHostException) {
-                withContext(Dispatchers.Main) {
-                    toast("Error while looking for bridge:\n${ex.message}")
-                }
-                null
-            }
-            ip?.let {
-                Log.i(TAG, "$ip")
-                controller = MiLightController(this@MainActivity, ip)
-            }
+        controller = MiLightController(this@MainActivity)
+        controller.discover()
+//        launch(Dispatchers.IO) {
+//            val ip = try {
+//                InetAddress.getByName(bridge)
+//            } catch (ex: UnknownHostException) {
+//                withContext(Dispatchers.Main) {
+//                    toast("Error while looking for bridge:\n${ex.message}")
+//                }
+//                null
+//            }
+//            ip?.let {
+//                Log.i(TAG, "$ip")
+//            }
+//        }
+
+        discover.setOnClickListener {
+            controller.discover()
         }
 
         on_button.setOnClickListener {
