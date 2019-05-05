@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,63 +9,106 @@
     android:gravity="center_horizontal">
 
     <Button
+        android:id="@+id/off_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="off"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/on_button"
+        />
+
+    <Button
+        app:layout_constraintTop_toTopOf="@id/off_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/off_button"
         android:id="@+id/on_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="on"/>
 
     <Button
-        android:id="@+id/off_button"
+        android:id="@+id/dimmer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="off"/>
+        android:text="dimmer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/brighter"
+        app:layout_constraintTop_toBottomOf="@id/off_button"
+        />
 
     <Button
         android:id="@+id/brighter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="brighter"/>
+        android:text="brighter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/dimmer"
+        app:layout_constraintTop_toTopOf="@id/dimmer"
 
-    <Button
-        android:id="@+id/dimmer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="dimmer"/>
-
-    <Button
-        android:id="@+id/max_brightness"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="max"/>
-
-    <Button
-        android:id="@+id/night_mode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="night mode"/>
-
-    <Button
-        android:id="@+id/warmer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="warmer"/>
+        />
 
     <Button
         android:id="@+id/cooler"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="cooler"/>
+        android:text="cooler"
+        app:layout_constraintTop_toBottomOf="@id/dimmer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/warmer"
+        />
+
+    <Button
+        android:id="@+id/warmer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="warmer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/cooler"
+        app:layout_constraintStart_toEndOf="@id/cooler"
+        />
+
+
+    <Button
+        android:id="@+id/night_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="night mode"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cooler"
+         />
+
+    <Button
+        android:id="@+id/max_brightness"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="max"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/night_mode"
+
+        />
 
     <Button
         android:id="@+id/link"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="link"/>
+        android:text="link"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/max_brightness"
+        />
 
     <Button
         android:id="@+id/unlink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="unlink"/>
+        android:text="unlink"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/link"
+        />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
