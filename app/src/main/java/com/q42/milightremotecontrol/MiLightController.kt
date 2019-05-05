@@ -27,9 +27,10 @@ class MiLightController(
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    data class Session(val id1: Int, val id2: Int)
+    data class Session(val socket : DatagramSocket, val id1: Int, val id2: Int)
 
-    private fun requestSession(socket: DatagramSocket): Session {
+    private fun requestSession(): Session {
+        val socket = DatagramSocket()
         val requestSessionCmd = unsignedByteArrayOf(
                 0x20, 0x00, 0x00, 0x00, 0x16, 0x02, 0x62, 0x3A,
                 0xD5, 0xED, 0xA3, 0x01, 0xAE, 0x08, 0x2D, 0x46,
@@ -44,31 +45,31 @@ class MiLightController(
         val receiveData = ByteArray(1024)
         val receivePacket = DatagramPacket(receiveData, receiveData.count())
         socket.receive(receivePacket)
-        val session1 = UByte.fromByte(receivePacket.data[19])
-        val session2 = UByte.fromByte(receivePacket.data[20])
+        val session1 = UByte.fromByte(receivePacket.data[19]).toInt()
+        val session2 = UByte.fromByte(receivePacket.data[20]).toInt()
         Log.i(TAG, "session id: $session1 $session2")
-        return Session(session1.toInt(), session2.toInt())
+        return Session(socket, session1, session2)
     }
 
     private fun sendCommand(cmd: ByteArray) {
         launch(Dispatchers.IO) {
             try {
                 // request session
-                val socket = DatagramSocket()
-                val (session1, session2) = requestSession(socket)
+
+                val session = requestSession()
 
                 // wait 50ms
                 delay(50)
-                val prefix = unsignedByteArrayOf(0x80, 0x00, 0x00, 0x00, 0x11, session1, session2, 0x00, 0x05, 0x00)
+                val prefix = unsignedByteArrayOf(0x80, 0x00, 0x00, 0x00, 0x11, session.id1, session.id2, 0x00, 0x05, 0x00)
                 val _cmd = cmd + unsignedByteArrayOf(zone, 0x00)
                 val checksum = unsignedByteArrayOf(_cmd.sum() and 0xff)
                 val buffer = prefix + _cmd + checksum
                 // send command using session id
                 val packet2 = DatagramPacket(buffer, buffer.count(), address, port)
-                socket.send(packet2)
+                session.socket.send(packet2)
 
                 // Close socket
-                socket.close()
+                session.socket.close()
             } catch (ex: Exception) {
                 withContext(Dispatchers.Main) {
                     context.toast("Error turning on lights:\n${ex.message}")
