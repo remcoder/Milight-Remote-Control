@@ -38,27 +38,27 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         on_button.setOnClickListener {
-            Log.i(TAG, "Turning lights on")
+            Log.d(TAG, "Turning lights on")
             controller.turnOn()
         }
 
         off_button.setOnClickListener {
-            Log.i(TAG, "Turning lights off")
+            Log.d(TAG, "Turning lights off")
             controller.turnOff()
         }
 
         brighter.setOnClickListener {
-            Log.i(TAG, "Turning lights up a bit")
+            Log.d(TAG, "Turning lights up a bit")
             controller.brighter()
         }
 
         dimmer.setOnClickListener {
-            Log.i(TAG, "Turning lights down a bit")
+            Log.d(TAG, "Turning lights down a bit")
             controller.dimmer()
         }
 
         max_brightness.setOnClickListener {
-            Log.i(TAG, "Setting to max brightness")
+            Log.d(TAG, "Setting to max brightness")
             controller.maxBrightness()
         }
 
