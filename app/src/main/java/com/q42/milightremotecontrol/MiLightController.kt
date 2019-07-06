@@ -48,17 +48,18 @@ class MiLightController(
         socket.receive(receivePacket)
         val session1 = UByte.fromByte(receivePacket.data[19]).toInt()
         val session2 = UByte.fromByte(receivePacket.data[20]).toInt()
-        Log.i(TAG, "session id: $session1 $session2")
+        Log.d(TAG, "session id: $session1 $session2")
         return Session(socket, session1, session2)
     }
 
     private fun sendCommand(cmd: ByteArray) {
 
         if (bridgeAddress == null) {
-            Log.i(TAG, "NO BRIDGE")
+            Log.w(TAG, "NO BRIDGE")
             return
         }
 
+        Log.d(TAG, "Request session")
         launch(Dispatchers.IO) {
             try {
                 // request session
@@ -122,8 +123,6 @@ class MiLightController(
             withContext(Dispatchers.Main) {
                 Log.i(TAG, ("received ${response.length} bytes from ${response.address}: $data"))
             }
-
-            socket.close()
         }
 
         bridgeAddress = response.address
