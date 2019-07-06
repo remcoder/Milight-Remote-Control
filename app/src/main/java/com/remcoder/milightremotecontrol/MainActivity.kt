@@ -10,7 +10,6 @@ import java.net.UnknownHostException
 import kotlin.coroutines.CoroutineContext
 
 const val TAG = "MainActivity"
-const val bridge = "hf-lpb100"
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
 
@@ -19,7 +18,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
