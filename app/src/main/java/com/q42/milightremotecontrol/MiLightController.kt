@@ -10,8 +10,6 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import kotlin.coroutines.CoroutineContext
-import android.system.Os.socket
-
 
 
 const val DEFAULT_MILIGHT_PORT = 5987
@@ -25,9 +23,7 @@ class MiLightController(
 ): CoroutineScope {
 
     private val job = Job()
-    private var isListening = false
-    private var isDiscovered = false
-    private var bridgeAddress : InetAddress? = null
+     var bridgeAddress : InetAddress? = null
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -57,7 +53,11 @@ class MiLightController(
     }
 
     private fun sendCommand(cmd: ByteArray) {
-        if (!isDiscovered) return
+
+        if (bridgeAddress == null) {
+            Log.i(TAG, "NO BRIDGE")
+            return
+        }
 
         launch(Dispatchers.IO) {
             try {
@@ -85,84 +85,49 @@ class MiLightController(
         }
     }
 
-    val discoveryMessageV6 = unsignedByteArrayOf(
+    private val discoveryMessageV6 = unsignedByteArrayOf(
         0x48, 0x46, 0x2D, 0x41,
         0x31, 0x31, 0x41, 0x53,
         0x53, 0x49, 0x53, 0x54,
         0x48, 0x52, 0x45, 0x41,
         0x44)
 
-    fun discover() {
+    suspend fun discover() : InetAddress {
         Log.i(TAG, "Discovering")
-
-        if (!isListening) {
-            listen()
-            isListening = true
-        }
-
-        sendDicoveryPacket()
-    }
-
-    fun sendDicoveryPacket() {
 
         Log.i(TAG, "send packet")
 
-        launch(Dispatchers.IO) {
-            DatagramSocket().use { socket ->
-                socket.broadcast = true
+        val address = InetAddress.getByAddress(byteArrayOfInts(255, 255, 255, 255))
+        val broadcast = DatagramPacket(
+            discoveryMessageV6,
+            discoveryMessageV6.size,
+            address,
+            DEFAULT_MILIGHT_PORT
+        )
 
-                val address = InetAddress.getByAddress(byteArrayOfInts(255, 255, 255, 255))
-                val broadcastPacket = DatagramPacket(
-                    discoveryMessageV6,
-                    discoveryMessageV6.size,
-                    address,
-                    DEFAULT_MILIGHT_PORT
-                )
+        val recvBuf = ByteArray(32)
+        val response = DatagramPacket(recvBuf, recvBuf.size)
+        DatagramSocket().use { socket ->
+            socket.broadcast = true
 
-                try {
-                    socket.send(broadcastPacket)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+            try {
+                socket.send(broadcast)
+                socket.receive(response)
+            } catch (e: Exception) {
+               e.printStackTrace()
             }
+
+            val data = String(response.data.slice(0..response.length).toByteArray())
+
+            withContext(Dispatchers.Main) {
+                Log.i(TAG, ("received ${response.length} bytes from ${response.address}: $data"))
+            }
+
+            socket.close()
         }
-    }
 
-
-    fun listen()  {
-        Log.i(TAG, "listening")
-
-        launch(Dispatchers.IO) {
-            val address = InetAddress.getByAddress(byteArrayOfInts(0, 0, 0, 0))
-            DatagramSocket(DEFAULT_MILIGHT_PORT, address).use { socket ->
-                socket.broadcast = true
-
-                while (true) {
-
-                    val recvBuf = ByteArray(64)
-                    val packet = DatagramPacket(recvBuf, recvBuf.size)
-
-                    try {
-                        socket.receive(packet)
-                        if (packet.data.size >= 2) {
-                            val data = String(packet.data)
-//                            if (packet.address == InetAddress.getByName("192.168.178.29"))
-//                                continue
-
-                            withContext(Dispatchers.Main) {
-                                context.toast("$data ${packet.address}")
-                                bridgeAddress = packet.address
-//                                isDiscovered = true
-                            }
-//                            break
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            } // socket closed
-            isListening = false
-        }
+        bridgeAddress = response.address
+        return response.address
     }
 
     // WW/CW commands

@@ -28,23 +28,32 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         setContentView(R.layout.activity_main)
 
         controller = MiLightController(this@MainActivity)
-        controller.discover()
-//        launch(Dispatchers.IO) {
-//            val ip = try {
-//                InetAddress.getByName(bridge)
-//            } catch (ex: UnknownHostException) {
-//                withContext(Dispatchers.Main) {
-//                    toast("Error while looking for bridge:\n${ex.message}")
-//                }
-//                null
-//            }
-//            ip?.let {
-//                Log.i(TAG, "$ip")
-//            }
-//        }
+//        controller.discover()
+        launch(Dispatchers.IO) {
+            val ip = try {
+                InetAddress.getByName(bridge)
+            } catch (ex: UnknownHostException) {
+                withContext(Dispatchers.Main) {
+                    toast("Error while looking for bridge:\n${ex.message}")
+                }
+                null
+            }
+            ip?.let {
+                Log.i(TAG, "$ip")
+                controller.bridgeAddress = ip
+            }
+        }
 
         discover.setOnClickListener {
-            controller.discover()
+            launch(Dispatchers.IO) {
+
+                val bridgeAddress = async { controller.discover() }
+
+                withContext(Dispatchers.Main) {
+
+                    bridge_id.text = bridgeAddress.await().toString()
+                }
+            }
         }
 
         on_button.setOnClickListener {
