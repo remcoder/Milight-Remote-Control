@@ -1,8 +1,9 @@
-package com.q42.milightremotecontrol
+package com.remcoder.milightremotecontrol
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import com.remcoder.milightremotecontrol.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.net.InetAddress

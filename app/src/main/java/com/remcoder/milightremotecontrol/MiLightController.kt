@@ -1,4 +1,4 @@
-package com.q42.milightremotecontrol
+package com.remcoder.milightremotecontrol
 
 import android.content.Context
 import android.util.Log

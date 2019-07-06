@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.q42.milightremotecontrol"
+        applicationId "com.remcoder.milightremotecontrol"
         minSdkVersion 25
         targetSdkVersion 28
         versionCode 1
