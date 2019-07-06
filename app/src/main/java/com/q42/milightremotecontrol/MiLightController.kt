@@ -11,6 +11,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import kotlin.coroutines.CoroutineContext
 
+
 const val DEFAULT_MILIGHT_PORT = 5987
 
 // temporary constant
@@ -18,11 +19,11 @@ const val zone = 1
 
 class MiLightController(
         private val context: Context,
-        private val address: InetAddress,
         private val port: Int = DEFAULT_MILIGHT_PORT
 ): CoroutineScope {
 
     private val job = Job()
+     var bridgeAddress : InetAddress? = null
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -37,7 +38,7 @@ class MiLightController(
                 0x61, 0x41, 0xA7, 0xF6, 0xDC, 0xAF, 0xD3, 0xE6,
                 0x00, 0x00, 0x1E) // (use checksum instead?)
 
-        val packet = DatagramPacket(requestSessionCmd, requestSessionCmd.count(), address, port)
+        val packet = DatagramPacket(requestSessionCmd, requestSessionCmd.count(), bridgeAddress, port)
         // send UDP packet
         socket.send(packet)
 
@@ -47,11 +48,18 @@ class MiLightController(
         socket.receive(receivePacket)
         val session1 = UByte.fromByte(receivePacket.data[19]).toInt()
         val session2 = UByte.fromByte(receivePacket.data[20]).toInt()
-        Log.i(TAG, "session id: $session1 $session2")
+        Log.d(TAG, "session id: $session1 $session2")
         return Session(socket, session1, session2)
     }
 
     private fun sendCommand(cmd: ByteArray) {
+
+        if (bridgeAddress == null) {
+            Log.w(TAG, "NO BRIDGE")
+            return
+        }
+
+        Log.d(TAG, "Request session")
         launch(Dispatchers.IO) {
             try {
                 // request session
@@ -65,7 +73,7 @@ class MiLightController(
                 val checksum = unsignedByteArrayOf(_cmd.sum() and 0xff)
                 val buffer = prefix + _cmd + checksum
                 // send command using session id
-                val packet2 = DatagramPacket(buffer, buffer.count(), address, port)
+                val packet2 = DatagramPacket(buffer, buffer.count(), bridgeAddress, port)
                 session.socket.send(packet2)
 
                 // Close socket
@@ -76,6 +84,47 @@ class MiLightController(
                 }
             }
         }
+    }
+
+    private val discoveryMessageV6 = unsignedByteArrayOf(
+        0x48, 0x46, 0x2D, 0x41,
+        0x31, 0x31, 0x41, 0x53,
+        0x53, 0x49, 0x53, 0x54,
+        0x48, 0x52, 0x45, 0x41,
+        0x44)
+
+    suspend fun discover() : InetAddress {
+        Log.d(TAG, "Send discovery packet")
+
+        val address = InetAddress.getByAddress(byteArrayOfInts(255, 255, 255, 255))
+        val broadcast = DatagramPacket(
+            discoveryMessageV6,
+            discoveryMessageV6.size,
+            address,
+            DEFAULT_MILIGHT_PORT
+        )
+
+        val recvBuf = ByteArray(32)
+        val response = DatagramPacket(recvBuf, recvBuf.size)
+        DatagramSocket().use { socket ->
+            socket.broadcast = true
+
+            try {
+                socket.send(broadcast)
+                socket.receive(response)
+            } catch (e: Exception) {
+               e.printStackTrace()
+            }
+
+            val data = String(response.data.slice(0..response.length).toByteArray())
+
+            withContext(Dispatchers.Main) {
+                Log.d(TAG, ("received ${response.length} bytes from ${response.address}: $data"))
+            }
+        }
+
+        bridgeAddress = response.address
+        return response.address
     }
 
     // WW/CW commands
@@ -138,4 +187,6 @@ class MiLightController(
     fun cancelJobs() {
         job.cancel()
     }
+
+    fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
 }
