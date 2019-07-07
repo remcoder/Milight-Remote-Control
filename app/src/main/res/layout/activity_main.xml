@@ -8,12 +8,33 @@
     tools:context="com.remcoder.milightremotecontrol.MainActivity"
     android:gravity="center_horizontal">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <ImageView
+            android:id="@+id/bridge_status"
+            android:src="@drawable/ic_circle_orange"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:gravity="right"
+        />
+
+    </android.support.v7.widget.Toolbar>
+
     <Button
         android:id="@+id/off_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="off"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/on_button"
         android:src="@drawable/light_off"
