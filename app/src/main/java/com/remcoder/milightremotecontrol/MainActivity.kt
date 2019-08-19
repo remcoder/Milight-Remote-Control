@@ -3,19 +3,16 @@ package com.remcoder.milightremotecontrol
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.remcoder.milightremotecontrol.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import java.net.InetAddress
-import java.net.UnknownHostException
 import kotlin.coroutines.CoroutineContext
 
 const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
 
-    lateinit var controller : MiLightController
-    lateinit var job: Job
+    private lateinit var controller : MiLightController
+    private lateinit var job: Job
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -24,7 +21,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         job = Job()
 
+        setSupportActionBar(toolbar)
         setContentView(R.layout.activity_main)
+        toolbar.title = "Milight Control"
+        toolbar.setTitleTextColor(getColor(R.color.white))
+
 
         controller = MiLightController(this@MainActivity)
 
@@ -82,15 +83,28 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    fun discoverBridge() {
+    private fun discoverBridge() {
+        bridge_status.setImageResource(R.drawable.ic_circle_orange)
+
         launch(Dispatchers.IO) {
 
-            val bridgeAddress = async { controller.discover() }
-
-            withContext(Dispatchers.Main) {
-
-                bridge_id.text = bridgeAddress.await().toString()
+            val bridgeAddress  = try {
+                async { controller.discover() }
             }
+            catch (e: Exception) {
+                bridge_status.setImageResource(R.drawable.ic_circle_red)
+                null
+            }
+
+            bridgeAddress?.let {
+
+                withContext(Dispatchers.Main) {
+
+                    bridge_id.text = it.await().toString()
+                    bridge_status.setImageResource(R.drawable.ic_circle_green)
+                }
+            }
+
         }
     }
 

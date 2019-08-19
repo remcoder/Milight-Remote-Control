@@ -94,7 +94,7 @@ class MiLightController(
         0x44)
 
     suspend fun discover() : InetAddress {
-        Log.d(TAG, "Send discovery packet")
+        Log.i(TAG, "Send discovery packet")
 
         val address = InetAddress.getByAddress(byteArrayOfInts(255, 255, 255, 255))
         val broadcast = DatagramPacket(
@@ -117,9 +117,10 @@ class MiLightController(
             }
 
             val data = String(response.data.slice(0..response.length).toByteArray())
+            val parts = data.split(Regex(",|:"))
 
             withContext(Dispatchers.Main) {
-                Log.d(TAG, ("received ${response.length} bytes from ${response.address}: $data"))
+                Log.i(TAG, ("received ${response.length} bytes from ${response.address}: $parts"))
             }
         }
 
